@@ -1,15 +1,25 @@
-# === Core Flask and Utilities ===
+blinker==1.9.0
+certifi==2025.10.5
+charset-normalizer==3.4.4
+click==8.3.0
+cloudinary==1.44.1
+cmake==4.1.2
+colorama==0.4.6
+dlib @ file:///F:/Face%20Detection/dlib-19.24.99-cp312-cp312-win_amd64.whl#sha256=20c62e606ca4c9961305f7be3d03990380d3e6c17f8d27798996e97a73271862
+dnspython==2.8.0
+email_validator==2.1.1
 Flask==3.0.3
-Werkzeug==3.0.2
-python-dotenv==1.0.1
-
-# === Image and Computer Vision ===
-opencv-contrib-python==4.10.0.84
+idna==3.11
+itsdangerous==2.2.0
+Jinja2==3.1.6
+MarkupSafe==3.0.3
 numpy==1.26.4
-Pillow==10.3.0
-
-# === Optional but Recommended (Performance & Email Support) ===
+opencv-contrib-python==4.10.0.84
+pillow==10.3.0
+python-dotenv==1.0.1
 requests==2.32.3
-email-validator==2.1.1
-itsdangerous>=2.2.0
-cloudinary
+setuptools==80.9.0
+six==1.17.0
+urllib3==2.5.0
+Werkzeug==3.0.2
+wheel==0.45.1
