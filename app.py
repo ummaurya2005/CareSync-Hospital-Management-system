@@ -12,14 +12,14 @@ load_dotenv()
 import cloudinary_config
 
 # === Initialize Flask app ===
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# === Initialize Flask app ===
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = Flask(
     __name__,
     static_folder=os.path.join(BASE_DIR, "frontend", "static"),
     template_folder=os.path.join(BASE_DIR, "frontend", "templates")
 )
-
 # === Secure Flask Secret Key ===
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_secret_key")
 
@@ -33,7 +33,6 @@ from database import init_db
 from database import ensure_approved_column  # ✅ Add approval field if not present
 init_db()
 ensure_approved_column()
-os.system("python create_admin.py")
 
 # === Import Blueprints ===
 from routes.register_routes import register_bp
@@ -87,4 +86,6 @@ def internal_error(e):
 # 🧠 START SERVER
 # ===============================
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    print("🚀 Starting CareSync Flask Server...")
+    print("🔗 Visit: http://127.0.0.1:5000/")
+    app.run(debug=True)
