@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 import sqlite3, datetime
 from email_utils import send_appointment_email
 
-appointment_bp = Blueprint('appointment', __name__, template_folder='../templates')
+appointment_bp =Blueprint('appointment', __name__)
 
 def get_db(): return sqlite3.connect('database.db')
 

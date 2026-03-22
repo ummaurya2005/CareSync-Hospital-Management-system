@@ -131,7 +131,7 @@ import cv2
 import numpy as np
 
 # ===== Blueprint =====
-detect_bp = Blueprint('detect', __name__, template_folder='../templates')
+detect_bp = Blueprint('detect', __name__)
 
 # ===== Paths =====
 RECOGNIZER_PATH = os.path.join("recognizer", "trainingdata.yml")

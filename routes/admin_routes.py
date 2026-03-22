@@ -269,7 +269,7 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 
 # === Blueprint setup ===
-admin_bp = Blueprint('admin', __name__, template_folder='../templates')
+admin_bp = Blueprint('admin', __name__)
 
 # === Paths ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))                 # .../backend/routes

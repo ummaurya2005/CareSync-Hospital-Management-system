@@ -6,7 +6,7 @@ import os
 from email_utils import send_appointment_email
 
 # Define Blueprint
-auth = Blueprint('auth', __name__, template_folder='../templates')
+auth = Blueprint('auth', __name__)
 
 # === Use absolute database path ===
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

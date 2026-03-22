@@ -9,9 +9,16 @@ from database import init_db, ensure_approved_column
 
 # === Load environment variables ===
 load_dotenv()
+import cloudinary_config
 
 # === Initialize Flask app ===
-app = Flask(__name__, static_folder="static", template_folder="templates")
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+app = Flask(
+    __name__,
+    static_folder=os.path.join(BASE_DIR, "frontend", "static"),
+    template_folder=os.path.join(BASE_DIR, "frontend", "templates")
+)
 
 # === Secure Flask Secret Key ===
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_secret_key")

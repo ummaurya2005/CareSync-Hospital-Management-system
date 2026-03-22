@@ -4,8 +4,7 @@ import numpy as np
 from PIL import Image
 import os
 
-train_bp = Blueprint('train', __name__, template_folder='../templates')
-
+train_bp = Blueprint('train', __name__)
 dataset_path = "dataset"
 recognizer_path = "recognizer"
 os.makedirs(recognizer_path, exist_ok=True)

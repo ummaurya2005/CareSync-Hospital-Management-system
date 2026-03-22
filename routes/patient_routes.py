@@ -6,7 +6,7 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from email_utils import send_reset_email  # make sure this file exists and works
 
 # === Blueprint ===
-patient_bp = Blueprint('patient', __name__, template_folder='../templates')
+patient_bp = Blueprint('patient', __name__)
 
 # === Paths ===
 RECOGNIZER_PATH = os.path.join("recognizer", "trainingdata.yml")
@@ -69,78 +69,6 @@ def face_verify_page():
         return redirect(url_for('patient.login_page'))
     return render_template('verify_face.html', user_id=session['user_id'], name=session['user_name'])
 
-
-# ===============================
-# ⚡ FACE VERIFICATION (AJAX)
-# ===============================
-# @patient_bp.route('/verify_frame', methods=['POST'])
-# def verify_frame():
-#     data = request.get_json()
-#     img_data = data.get('image')
-#     user_id = int(data.get('user_id'))
-
-#     # Check if model exists
-#     if not os.path.exists(RECOGNIZER_PATH):
-#         return jsonify({"status": "error", "message": "⚠️ Face model not trained yet."})
-
-#     # Decode base64 image from webcam
-#     try:
-#         img_bytes = base64.b64decode(img_data.split(',')[1])
-#         img_np = np.frombuffer(img_bytes, np.uint8)
-#         img = cv2.imdecode(img_np, cv2.IMREAD_COLOR)
-#     except Exception as e:
-#         print("❌ Image decode error:", e)
-#         return jsonify({"status": "error", "message": "Failed to read image data"})
-
-#     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-#     gray = cv2.equalizeHist(gray)
-
-#     # Detect faces (use OpenCV Haar)
-#     faces = face_cascade.detectMultiScale(gray, 1.3, 5, minSize=(90, 90))
-#     if len(faces) == 0:
-#         print("⚠️ No face detected in frame.")
-#         return jsonify({"status": "no_face"})
-
-#     # Load recognizer model
-#     recognizer = cv2.face.LBPHFaceRecognizer_create()
-#     recognizer.read(RECOGNIZER_PATH)
-
-#     verified = False
-#     confidence_score = 999
-#     predicted_id = None
-
-#     for (x, y, w, h) in faces:
-#         face_roi = gray[y:y+h, x:x+w]
-#         if face_roi.size == 0:
-#             continue
-
-#         face_resized = cv2.resize(face_roi, (200, 200))
-#         id_pred, conf = recognizer.predict(face_resized)
-#         predicted_id = id_pred
-#         confidence_score = conf
-#         print(f"Prediction → ID: {id_pred}, Conf: {conf:.2f}")
-
-#         # Relaxed threshold
-#         if id_pred == user_id and conf < 85:
-#             verified = True
-#             print(f"✅ Verified match: ID={id_pred}, Confidence={conf:.2f}")
-#             break
-#         else:
-#             print(f"⚠️ Mismatch or low confidence → Pred: {id_pred}, Conf={conf:.2f}")
-
-#     # Decision based on verification
-#     if verified:
-#         session['verified'] = True
-#         print(f"✅ Face verified successfully for user {user_id}")
-#         return jsonify({"status": "verified"})
-#     else:
-#         # Handle borderline or failure case
-#         if predicted_id == user_id and confidence_score < 95:
-#             print("⚠️ Accepting borderline match due to repeated recognition")
-#             session['verified'] = True
-#             return jsonify({"status": "verified"})
-#         print(f"❌ Verification failed. Conf={confidence_score:.2f}")
-#         return jsonify({"status": "failed"})
 
 @patient_bp.route('/verify_frame', methods=['POST'])
 def verify_frame():
