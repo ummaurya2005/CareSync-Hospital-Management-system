@@ -5,7 +5,7 @@ click==8.3.0
 cloudinary==1.44.1
 cmake==4.1.2
 colorama==0.4.6
-dlib @ file:///F:/Face%20Detection/dlib-19.24.99-cp312-cp312-win_amd64.whl#sha256=20c62e606ca4c9961305f7be3d03990380d3e6c17f8d27798996e97a73271862
+dlib
 dnspython==2.8.0
 email_validator==2.1.1
 Flask==3.0.3
