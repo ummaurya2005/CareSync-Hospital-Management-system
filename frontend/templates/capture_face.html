@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="camera-section">
+  <div class="capture-card">
+    <h2>📸 Capturing Face Data for <span class="highlight">{{ name }}</span></h2>
+    <p class="subtitle">Look straight at the camera. We’ll automatically capture and train your model.</p>
+
+    <div class="camera-container">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="canvas" style="display:none;"></canvas>
+      <div id="flash-overlay"></div>
+    </div>
+
+    <div class="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+    <p id="progress-text">Captured: <span id="count">0</span> / 40</p>
+
+    <p id="status-text" class="status-info">Idle — click “Start Capturing”</p>
+    <button id="startBtn" class="btn">▶ Start Capturing</button>
+    <a href="/" class="btn back">⬅ Back Home</a>
+  </div>
+</section>
+
+<script>
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const progressBar = document.getElementById('progress-bar');
+const countText = document.getElementById('count');
+const progressText = document.getElementById('progress-text');
+const startBtn = document.getElementById('startBtn');
+const statusText = document.getElementById('status-text');
+const flashOverlay = document.getElementById('flash-overlay');
+
+let sampleNum = 0;
+const maxSamples = 40;
+const userId = "{{ user_id }}";
+
+// === Get Webcam Stream ===
+navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+  .then(stream => video.srcObject = stream)
+  .catch(err => {
+    alert("⚠️ Camera access denied or unavailable: " + err);
+    startBtn.disabled = true;
+  });
+
+// === Send Frame to Backend ===
+async function captureFrame() {
+  const ctx = canvas.getContext('2d');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  const imgData = canvas.toDataURL('image/jpeg', 0.85);
+
+  flashOverlay.style.opacity = '1';
+  setTimeout(() => (flashOverlay.style.opacity = '0'), 80);
+
+  const res = await fetch("{{ url_for('register.save_face') }}", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: imgData, user_id: userId, sample_num: sampleNum })
+  });
+  return res.json();
+}
+
+// === Finalize Capture: Train Recognizer ===
+async function finishTraining() {
+  statusText.textContent = "⚙️ Training model, please wait...";
+  statusText.style.color = "#007bff";
+
+  const res = await fetch("{{ url_for('register.finish_capture') }}", { method: "POST" });
+  const data = await res.json();
+
+  if (data.status === "trained") {
+    progressBar.style.background = "#28a745";
+    statusText.textContent = "✅ Model trained successfully!";
+    statusText.style.color = "#28a745";
+    setTimeout(() => {
+      window.location.href = "{{ url_for('patient.login_page') }}";
+    }, 2000);
+  } else {
+    statusText.textContent = "⚠️ Training failed. Please try again.";
+    statusText.style.color = "#dc3545";
+    startBtn.disabled = false;
+  }
+}
+
+// === Main Capture Loop ===
+startBtn.onclick = async () => {
+  startBtn.disabled = true;
+  startBtn.textContent = "Capturing...";
+  statusText.textContent = "🔎 Capturing faces...";
+  statusText.style.color = "#007bff";
+
+  for (sampleNum = 1; sampleNum <= maxSamples; sampleNum++) {
+    const response = await captureFrame();
+    if (response.status === "success" || response.status === "noface") {
+      countText.textContent = response.saved || sampleNum;
+      progressBar.style.width = `${(sampleNum / maxSamples) * 100}%`;
+    }
+
+    await new Promise(r => setTimeout(r, 250)); // ~4 fps
+  }
+
+  statusText.textContent = "✅ Capture complete! Starting training...";
+  statusText.style.color = "#28a745";
+  progressBar.style.background = "#28a745";
+
+  await finishTraining();
+};
+</script>
+
+<style>
+/* ===== Layout ===== */
+.camera-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #f0f8ff, #e8f5e9);
+  min-height: 90vh;
+}
+
+/* ===== Card ===== */
+.capture-card {
+  background: white;
+  border-radius: 18px;
+  padding: 40px 50px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  max-width: 640px;
+  width: 100%;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+.capture-card:hover { transform: translateY(-3px); }
+
+h2 {
+  color: #333;
+  font-size: 1.8rem;
+  margin-bottom: 10px;
+}
+.highlight { color: #007bff; font-weight: 600; }
+.subtitle { color: #555; margin-bottom: 25px; }
+
+/* ===== Camera ===== */
+.camera-container {
+  position: relative;
+  width: 480px;
+  height: 360px;
+  border: 3px solid #007bff;
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 20px auto;
+  background: #000;
+}
+video { width: 100%; height: 100%; object-fit: cover; }
+#flash-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255,255,255,0.8);
+  opacity: 0; transition: opacity 0.2s;
+}
+
+/* ===== Progress ===== */
+.progress-container {
+  background: #e0e0e0;
+  border-radius: 10px;
+  height: 12px;
+  width: 100%;
+  margin: 15px 0;
+  overflow: hidden;
+}
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #007bff, #28a745);
+  transition: width 0.3s ease-in-out;
+}
+
+/* ===== Status + Buttons ===== */
+#status-text {
+  font-size: 1.1rem;
+  margin-top: 8px;
+  color: #444;
+  font-weight: 500;
+}
+
+.btn {
+  background: linear-gradient(90deg, #007bff, #00c6ff);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  margin: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn:hover { background: linear-gradient(90deg, #0056b3, #0099ff); transform: scale(1.05); }
+.btn.back { background: #6c757d; }
+.btn.back:hover { background: #5a6268; }
+
+#progress-text {
+  font-size: 1rem;
+  color: #333;
+}
+</style>
+
+{% endblock %}

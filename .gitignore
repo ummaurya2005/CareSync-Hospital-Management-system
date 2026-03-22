@@ -1,0 +1,11 @@
+# Secrets
+.env
+
+# Environments
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+trainingdata.yml
