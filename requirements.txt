@@ -5,3 +5,4 @@ pillow
 cloudinary
 python-dotenv
 gunicorn
+dlib-bin
