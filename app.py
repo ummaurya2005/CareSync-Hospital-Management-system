@@ -33,6 +33,7 @@ from database import init_db
 from database import ensure_approved_column  # ✅ Add approval field if not present
 init_db()
 ensure_approved_column()
+os.system("python create_admin.py")
 
 # === Import Blueprints ===
 from routes.register_routes import register_bp
