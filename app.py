@@ -10,22 +10,16 @@ from email_utils import send_email
 
 # === Load environment variables ===
 load_dotenv()
-from create_admin import admin_name, admin_email, admin_password
-import create_admin
-init_db()
-ensure_approved_column()
-# === Ensure admin account exists ===
-try:
-    print("🔐 Ensuring admin account exists...")
-    import create_admin  # runs admin creation/update script
-except Exception as e:
-    print("⚠️ Admin initialization failed:", e)
 
 init_db()
 ensure_approved_column()
 
 from routes.admin_routes import ensure_admin_exists
 ensure_admin_exists()
+from werkzeug.security import generate_password_hash
+import sqlite3
+
+
 import cloudinary_config
 
 # === Initialize Flask app ===
@@ -70,6 +64,25 @@ app.register_blueprint(patient_bp, url_prefix="/patient")
 # ===============================
 # 🌐 HOME ROUTES
 # ===============================
+
+@app.route("/create-admin")
+def create_admin():
+    conn = sqlite3.connect("database.db")
+
+    name = "Dr Admin"
+    email = "admin@caresync.com"
+    password = generate_password_hash("admin123")
+
+    conn.execute(
+        "INSERT INTO admins (name,email,password_hash) VALUES (?,?,?)",
+        (name,email,password)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return "Admin created successfully"
+
 @app.route("/")
 def home():
     """Main landing page"""
