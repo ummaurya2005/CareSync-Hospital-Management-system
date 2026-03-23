@@ -291,6 +291,37 @@ FACE_SIZE = (200, 200)          # must match training tile size
 def get_db_connection():
     return sqlite3.connect(DB_PATH)
 
+
+def ensure_admin_exists():
+    """Ensure at least one admin exists in the database."""
+    from werkzeug.security import generate_password_hash
+    import os
+
+    admin_name = os.getenv("ADMIN_NAME", "Dr. Admin")
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@caresync.com")
+    admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    admin = cursor.execute(
+        "SELECT id FROM admins WHERE email=?",
+        (admin_email,)
+    ).fetchone()
+
+    if not admin:
+        password_hash = generate_password_hash(admin_password)
+
+        cursor.execute(
+            "INSERT INTO admins (name, email, password_hash) VALUES (?, ?, ?)",
+            (admin_name, admin_email, password_hash)
+        )
+
+        conn.commit()
+        print(f"✅ Admin created automatically: {admin_email}")
+
+    conn.close()
+
 # ===============================
 # 🧑‍⚕️ ADMIN LOGIN
 # ===============================

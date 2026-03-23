@@ -45,7 +45,13 @@ try:
     import create_admin  # runs admin creation/update script
 except Exception as e:
     print("⚠️ Admin initialization failed:", e)
-    
+
+init_db()
+ensure_approved_column()
+
+from routes.admin_routes import ensure_admin_exists
+ensure_admin_exists()
+
 # === Import Blueprints ===
 from routes.register_routes import register_bp
 from routes.train_routes import train_bp
