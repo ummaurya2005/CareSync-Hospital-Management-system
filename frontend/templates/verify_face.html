@@ -78,18 +78,26 @@ async function sendFrame() {
 
 // === Continuous Capture Loop (very fast) ===
 function continuousVerify() {
-  if (verified || attempts >= 20) {
+  if (verified) {
+    return;   // stop immediately if verified
+  }
+
+  if (attempts >= 20) {
     onVerifyEnd();
     return;
   }
 
-  // Skip every other frame for speed (~15 fps)
-  if (frameSkip % 2 === 0) sendFrame();
+  if (frameSkip % 2 === 0) {
+    sendFrame();
+  }
+
   frameSkip++;
 
-  requestAnimationFrame(continuousVerify);
+  // slower loop for cloud deployment
+  setTimeout(() => {
+    requestAnimationFrame(continuousVerify);
+  }, 200);
 }
-
 // === Button Action ===
 startBtn.onclick = () => {
   startBtn.disabled = true;

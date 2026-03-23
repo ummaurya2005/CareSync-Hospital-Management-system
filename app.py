@@ -35,6 +35,17 @@ from database import ensure_approved_column  # ✅ Add approval field if not pre
 init_db()
 ensure_approved_column()
 
+from create_admin import admin_name, admin_email, admin_password
+import create_admin
+init_db()
+ensure_approved_column()
+# === Ensure admin account exists ===
+try:
+    print("🔐 Ensuring admin account exists...")
+    import create_admin  # runs admin creation/update script
+except Exception as e:
+    print("⚠️ Admin initialization failed:", e)
+    
 # === Import Blueprints ===
 from routes.register_routes import register_bp
 from routes.train_routes import train_bp
