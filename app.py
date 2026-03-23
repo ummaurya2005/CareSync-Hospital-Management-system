@@ -10,6 +10,22 @@ from email_utils import send_email
 
 # === Load environment variables ===
 load_dotenv()
+from create_admin import admin_name, admin_email, admin_password
+import create_admin
+init_db()
+ensure_approved_column()
+# === Ensure admin account exists ===
+try:
+    print("🔐 Ensuring admin account exists...")
+    import create_admin  # runs admin creation/update script
+except Exception as e:
+    print("⚠️ Admin initialization failed:", e)
+
+init_db()
+ensure_approved_column()
+
+from routes.admin_routes import ensure_admin_exists
+ensure_admin_exists()
 import cloudinary_config
 
 # === Initialize Flask app ===
@@ -35,22 +51,7 @@ from database import ensure_approved_column  # ✅ Add approval field if not pre
 init_db()
 ensure_approved_column()
 
-from create_admin import admin_name, admin_email, admin_password
-import create_admin
-init_db()
-ensure_approved_column()
-# === Ensure admin account exists ===
-try:
-    print("🔐 Ensuring admin account exists...")
-    import create_admin  # runs admin creation/update script
-except Exception as e:
-    print("⚠️ Admin initialization failed:", e)
 
-init_db()
-ensure_approved_column()
-
-from routes.admin_routes import ensure_admin_exists
-ensure_admin_exists()
 
 # === Import Blueprints ===
 from routes.register_routes import register_bp
