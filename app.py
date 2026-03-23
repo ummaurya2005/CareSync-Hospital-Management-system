@@ -6,6 +6,7 @@ from flask import Flask, render_template, redirect, url_for
 from dotenv import load_dotenv
 import os
 from database import init_db, ensure_approved_column
+from email_utils import send_email
 
 # === Load environment variables ===
 load_dotenv()
@@ -66,6 +67,10 @@ def features():
 def login_redirect():
     return redirect(url_for("patient.login_page"))
 
+@app.route("/test-email")
+def test_email():
+    send_email("your_email@gmail.com", "Test Email", "<h1>Hello from CareSync!</h1>")
+    return "✅ Email test triggered"
 
 # ===============================
 # ⚠️ ERROR HANDLERS
