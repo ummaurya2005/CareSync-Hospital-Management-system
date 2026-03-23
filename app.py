@@ -80,7 +80,7 @@ def login_redirect():
 
 @app.route("/test-email")
 def test_email():
-    send_email("your_email@gmail.com", "Test Email", "<h1>Hello from CareSync!</h1>")
+    send_email("2k23.cs2314024@gmail.com", "ummauryas2005@gmail.com", "<h1>Hello from CareSync!</h1>")
     return "✅ Email test triggered"
 
 # ===============================
