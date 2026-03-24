@@ -194,31 +194,77 @@ def details():
 # ===============================
 # 🔑 FORGOT PASSWORD
 # ===============================
+# @patient_bp.route('/forgot_password', methods=['GET', 'POST'])
+# def forgot_password():
+#     if request.method == 'POST':
+#         email = request.form['email'].strip().lower()
+
+#         conn = get_db()
+#         user = conn.execute("SELECT id, name FROM users WHERE email=?", (email,)).fetchone()
+#         conn.close()
+
+#         if user:
+#             token = serializer.dumps(email, salt='password-reset-salt')
+#             reset_url = url_for('patient.reset_password', token=token, _external=True)
+#             send_reset_email(user[1], email, reset_url)
+#             flash("📧 A password reset link has been sent to your email.", "info")
+#         else:
+#             flash("❌ No account found with that email.", "danger")
+
+#     return render_template('forgot_password.html')
+
 @patient_bp.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
         email = request.form['email'].strip().lower()
 
         conn = get_db()
-        user = conn.execute("SELECT id, name FROM users WHERE email=?", (email,)).fetchone()
+
+        # case-insensitive email search
+        user = conn.execute(
+            "SELECT id, name FROM users WHERE LOWER(email)=?",
+            (email,)
+        ).fetchone()
+
         conn.close()
 
         if user:
             token = serializer.dumps(email, salt='password-reset-salt')
             reset_url = url_for('patient.reset_password', token=token, _external=True)
+
             send_reset_email(user[1], email, reset_url)
+
             flash("📧 A password reset link has been sent to your email.", "info")
         else:
             flash("❌ No account found with that email.", "danger")
 
     return render_template('forgot_password.html')
-
-
 # ===============================
 # 🔄 RESET PASSWORD
 # ===============================
+# @patient_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
+# def reset_password(token):
+#     try:
+#         email = serializer.loads(token, salt='password-reset-salt', max_age=600)
+#     except (SignatureExpired, BadSignature):
+#         flash("⚠️ Invalid or expired reset link.", "danger")
+#         return redirect(url_for('patient.forgot_password'))
+
+#     if request.method == 'POST':
+#         new_password = request.form['password']
+#         hashed = generate_password_hash(new_password)
+
+#         conn = get_db()
+#         conn.execute("UPDATE users SET password_hash=? WHERE email=?", (hashed, email))
+#         conn.commit()
+#         conn.close()
+
+#         flash("✅ Password has been reset successfully!", "success")
+#         return redirect(url_for('patient.login_page'))
+
 @patient_bp.route('/reset_password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
+
     try:
         email = serializer.loads(token, salt='password-reset-salt', max_age=600)
     except (SignatureExpired, BadSignature):
@@ -226,15 +272,24 @@ def reset_password(token):
         return redirect(url_for('patient.forgot_password'))
 
     if request.method == 'POST':
+
         new_password = request.form['password']
         hashed = generate_password_hash(new_password)
 
         conn = get_db()
-        conn.execute("UPDATE users SET password_hash=? WHERE email=?", (hashed, email))
+
+        conn.execute(
+            "UPDATE users SET password_hash=? WHERE LOWER(email)=?",
+            (hashed, email.lower())
+        )
+
         conn.commit()
         conn.close()
 
         flash("✅ Password has been reset successfully!", "success")
+
         return redirect(url_for('patient.login_page'))
 
     return render_template('reset_password.html', email=email)
+
+    #return render_template('reset_password.html', email=email)
