@@ -9,13 +9,21 @@ from dotenv import load_dotenv
 # ==========================
 load_dotenv()
 
-SENDER_EMAIL = os.getenv("EMAIL_USER")
-SENDER_PASSWORD = os.getenv("EMAIL_PASS")
+# SENDER_EMAIL = os.getenv("EMAIL_USER")
+# SENDER_PASSWORD = os.getenv("EMAIL_PASS")
 
 # SMTP_SERVER = "smtp.gmail.com"
 # SMTP_PORT = 587
 SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
 SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+
+
+import os
+import sib_api_v3_sdk
+from sib_api_v3_sdk.rest import ApiException
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 # ==========================
@@ -46,28 +54,61 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 #         print(f"❌ Failed to send email to {to_email}: {e}")
 #         return False
 
+# def send_email(to_email: str, subject: str, html_body: str):
+#     """Reusable function to send HTML email via Gmail securely."""
+#     try:
+#         if not SENDER_EMAIL or not SENDER_PASSWORD:
+#             print("❌ Missing EMAIL_USER or EMAIL_PASS in environment variables.")
+#             return False
+
+#         msg = MIMEMultipart("alternative")
+#         msg["From"] = SENDER_EMAIL
+#         msg["To"] = to_email
+#         msg["Subject"] = subject
+#         msg.attach(MIMEText(html_body, "html"))
+
+#         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10) as server:
+#             server.starttls()
+#             server.login(SENDER_EMAIL, SENDER_PASSWORD)
+#             server.send_message(msg)
+
+#         print(f"✅ Email sent successfully to {to_email}")
+#         return True
+
+#     except Exception as e:
+#         print(f"❌ Failed to send email to {to_email}: {e}")
+#         return False
+
 def send_email(to_email: str, subject: str, html_body: str):
-    """Reusable function to send HTML email via Gmail securely."""
+    """Reusable function to send HTML email via Brevo API."""
     try:
-        if not SENDER_EMAIL or not SENDER_PASSWORD:
-            print("❌ Missing EMAIL_USER or EMAIL_PASS in environment variables.")
+        api_key = os.getenv("BREVO_API_KEY")
+        sender_email = os.getenv("SENDER_EMAIL")
+
+        if not api_key or not sender_email:
+            print("❌ Missing BREVO_API_KEY or SENDER_EMAIL in environment variables.")
             return False
 
-        msg = MIMEMultipart("alternative")
-        msg["From"] = SENDER_EMAIL
-        msg["To"] = to_email
-        msg["Subject"] = subject
-        msg.attach(MIMEText(html_body, "html"))
+        configuration = sib_api_v3_sdk.Configuration()
+        configuration.api_key['api-key'] = api_key
 
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT, timeout=10) as server:
-            server.starttls()
-            server.login(SENDER_EMAIL, SENDER_PASSWORD)
-            server.send_message(msg)
+        api_instance = sib_api_v3_sdk.TransactionalEmailsApi(
+            sib_api_v3_sdk.ApiClient(configuration)
+        )
+
+        email = sib_api_v3_sdk.SendSmtpEmail(
+            to=[{"email": to_email}],
+            sender={"email": sender_email, "name": "CareSync Hospital"},
+            subject=subject,
+            html_content=html_body
+        )
+
+        api_instance.send_transac_email(email)
 
         print(f"✅ Email sent successfully to {to_email}")
         return True
 
-    except Exception as e:
+    except ApiException as e:
         print(f"❌ Failed to send email to {to_email}: {e}")
         return False
 

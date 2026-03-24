@@ -6,3 +6,4 @@ cloudinary
 python-dotenv
 gunicorn
 dlib-bin
+sib-api-v3-sdk
